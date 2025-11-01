@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private val rotationMatrix = FloatArray(9)
     private val orientation = FloatArray(3)
     private var declination = 0f
-    private var currentLatitude = 0.0f
+    private var currentLatitude = 0f
     private var devicePitch = 0.0f
 
     private lateinit var locationManager: LocationManager
@@ -57,11 +57,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
     @SuppressLint("MissingPermission")
     private fun initializeLocation() {
-        val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
         if (lastKnownLocation != null) {
             onLocationChanged(lastKnownLocation)
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 10f, this)
+        locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 5000L, 100f, this)
     }
 
     override fun onResume() {
@@ -69,7 +69,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 10f, this)
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 5000L, 100f, this)
+            //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 10f, this)
+            //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 10f, this)
         }
     }
 
@@ -90,7 +92,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             geomagnetic[1] = alpha * geomagnetic[1] + (1 - alpha) * event.values[1]
             geomagnetic[2] = alpha * geomagnetic[2] + (1 - alpha) * event.values[2]
         }
-
         val success = SensorManager.getRotationMatrix(rotationMatrix, null, gravity, geomagnetic)
         if (success && currentLatitude != 0.0f) {
             SensorManager.getOrientation(rotationMatrix, orientation)

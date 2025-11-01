@@ -5,7 +5,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sin
 
 class CompassView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
@@ -55,7 +61,7 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         val height = height.toFloat()
         val centerX = width / 2
         val centerY = height / 2
-        val radius = Math.min(centerX, centerY) - 80 // Adjusted radius to make space for text
+        val radius = min(centerX, centerY) - 80 // Adjusted radius to make space for text
 
         // Draw compass card
         canvas.save()
@@ -63,10 +69,10 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         canvas.drawCircle(centerX, centerY, radius, paint)
         for (i in 0 until 360 step 30) {
             val angle = Math.toRadians(i.toDouble())
-            val startX = centerX + (radius - 20) * Math.sin(angle).toFloat()
-            val startY = centerY - (radius - 20) * Math.cos(angle).toFloat()
-            val stopX = centerX + radius * Math.sin(angle).toFloat()
-            val stopY = centerY - radius * Math.cos(angle).toFloat()
+            val startX = centerX + (radius - 20) * sin(angle).toFloat()
+            val startY = centerY - (radius - 20) * cos(angle).toFloat()
+            val stopX = centerX + radius * sin(angle).toFloat()
+            val stopY = centerY - radius * cos(angle).toFloat()
             canvas.drawLine(startX, startY, stopX, stopY, paint)
         }
         canvas.drawText("N", centerX - 15, centerY - radius - 10, textPaint)
@@ -86,20 +92,20 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             if (deltaAzimuth <= -180) deltaAzimuth += 360f
 
             val deltaAltitude = lat - devicePitch
-
+Log.d("delta", deltaAzimuth.toString() + " " + deltaAltitude.toString())
             var displayAzimuth = deltaAzimuth
             var displayAltitude = deltaAltitude
 
-            if (Math.abs(deltaAzimuth) < 1.0f && Math.abs(deltaAltitude) < 1.0f) {
-                polarisPaint.color = Color.GREEN;
+            if (abs(deltaAzimuth) < 1.0f && abs(deltaAltitude) < 1.0f) {
+                polarisPaint.color = Color.GREEN
             } else {
-                polarisPaint.color = Color.RED;
+                polarisPaint.color = Color.RED
             }
-            if (Math.abs(deltaAzimuth) < 1.0f) errorTextPaintAz.color = Color.GREEN else errorTextPaintAz.color = Color.RED
-            if (Math.abs(deltaAltitude) < 1.0f) errorTextPaintAlt.color = Color.GREEN else errorTextPaintAlt.color = Color.RED
+            if (abs(deltaAzimuth) < 1.0f) errorTextPaintAz.color = Color.GREEN else errorTextPaintAz.color = Color.RED
+            if (abs(deltaAltitude) < 1.0f) errorTextPaintAlt.color = Color.GREEN else errorTextPaintAlt.color = Color.RED
 
             // If we are close to the target, magnify the deltas for sensitivity
-            if (Math.abs(deltaAzimuth) < zoomThreshold && Math.abs(deltaAltitude) < zoomThreshold) {
+            if (abs(deltaAzimuth) < zoomThreshold && abs(deltaAltitude) < zoomThreshold) {
                 displayAzimuth *= zoomFactor
                 displayAltitude *= zoomFactor
                 canvas.drawCircle(centerX, centerY, pixelsPerDegree * zoomFactor, paint)
@@ -110,8 +116,8 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             var polarisYOffset = pixelsPerDegree * displayAltitude
 
             // Clamp the offset to the radius of the compass to prevent it from going off-screen
-            polarisXOffset = Math.max(-radius, Math.min(radius, polarisXOffset))
-            polarisYOffset = Math.max(-radius, Math.min(radius, polarisYOffset))
+            polarisXOffset = max(-radius, min(radius, polarisXOffset))
+            polarisYOffset = max(-radius, min(radius, polarisYOffset))
 
             val polarisX = centerX + polarisXOffset
             val polarisY = centerY - polarisYOffset // Screen Y is inverted
