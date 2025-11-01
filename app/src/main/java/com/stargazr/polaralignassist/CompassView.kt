@@ -82,6 +82,10 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         canvas.drawLine(centerX - 30, centerY, centerX + 30, centerY, paint)
         canvas.drawLine(centerX, centerY - 30, centerX, centerY + 30, paint)
 
+        canvas.drawLine(centerX, centerY-radius, centerX, centerY+radius, paint)
+        canvas.drawLine(centerX, centerY-radius, centerX-50, centerY-radius+50, paint)
+        canvas.drawLine(centerX, centerY-radius, centerX+50, centerY-radius+50, paint)
+
         currentLatitude?.let { lat ->
             val pixelsPerDegree = radius / 90f
             val zoomThreshold = 15f // Degrees from center to apply zoom
