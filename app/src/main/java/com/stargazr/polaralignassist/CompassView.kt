@@ -5,13 +5,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 class CompassView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
@@ -96,9 +96,21 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             if (deltaAzimuth <= -180) deltaAzimuth += 360f
 
             val deltaAltitude = lat - devicePitch
-Log.d("delta", deltaAzimuth.toString() + " " + deltaAltitude.toString())
+
             var displayAzimuth = deltaAzimuth
             var displayAltitude = deltaAltitude
+
+            // Normalize
+            val len = sqrt(deltaAzimuth * deltaAzimuth + deltaAltitude * deltaAltitude)
+            if (len>90){
+                displayAzimuth = deltaAzimuth/len*90
+                displayAltitude = deltaAltitude/len*90
+                polarisPaint.style = Paint.Style.STROKE
+                polarisPaint.strokeWidth = 5f
+            } else {
+                polarisPaint.style = Paint.Style.FILL
+            }
+
 
             if (abs(deltaAzimuth) < 1.0f && abs(deltaAltitude) < 1.0f) {
                 polarisPaint.color = Color.GREEN
@@ -116,12 +128,8 @@ Log.d("delta", deltaAzimuth.toString() + " " + deltaAltitude.toString())
             }
 
             // Convert degrees to pixel offsets
-            var polarisXOffset = pixelsPerDegree * displayAzimuth
-            var polarisYOffset = pixelsPerDegree * displayAltitude
-
-            // Clamp the offset to the radius of the compass to prevent it from going off-screen
-            polarisXOffset = max(-radius, min(radius, polarisXOffset))
-            polarisYOffset = max(-radius, min(radius, polarisYOffset))
+            val polarisXOffset = pixelsPerDegree * displayAzimuth
+            val polarisYOffset = pixelsPerDegree * displayAltitude
 
             val polarisX = centerX + polarisXOffset
             val polarisY = centerY - polarisYOffset // Screen Y is inverted
