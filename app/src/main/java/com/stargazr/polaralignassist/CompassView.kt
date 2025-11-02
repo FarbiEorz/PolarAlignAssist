@@ -111,10 +111,10 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             var displayAltitude = deltaAltitude*2
 
             // Normalize
-            val len = sqrt(deltaAzimuth * deltaAzimuth + deltaAltitude * deltaAltitude)
+            val len = sqrt(displayAzimuth * displayAzimuth + displayAltitude * displayAltitude)
             if (len>90){
-                displayAzimuth = deltaAzimuth/len*90
-                displayAltitude = deltaAltitude/len*90
+                displayAzimuth = displayAzimuth/len*90
+                displayAltitude = displayAltitude/len*90
                 polarisPaint.style = Paint.Style.STROKE
                 polarisPaint.strokeWidth = 5f
             } else {
