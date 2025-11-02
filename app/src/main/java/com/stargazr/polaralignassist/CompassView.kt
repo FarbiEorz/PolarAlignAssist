@@ -45,10 +45,16 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         textAlign = Paint.Align.CENTER
     }
 
+    private val pitchModeTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 40f
+        color = Color.RED
+        textAlign = Paint.Align.CENTER
+    }
+
     fun updateData(azimuth: Float, devicePitch: Float, currentLatitude: Float) {
         this.azimuth = azimuth
         // The pitch from orientation sensor is negative when tilting up, so we invert it.
-        this.devicePitch = -devicePitch
+        this.devicePitch = devicePitch
         this.currentLatitude = currentLatitude
         invalidate()
     }
@@ -96,10 +102,13 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             if (deltaAzimuth > 180) deltaAzimuth -= 360f
             if (deltaAzimuth <= -180) deltaAzimuth += 360f
 
-            val deltaAltitude = lat - devicePitch
+            val deltaAltitude = lat - abs(devicePitch)
+            if (devicePitch > 0) {
+                canvas.drawText("Inverted Pitch Mode", centerX, centerY - radius - 60f, pitchModeTextPaint)
+            }
 
             var displayAzimuth = deltaAzimuth
-            var displayAltitude = deltaAltitude
+            var displayAltitude = deltaAltitude*2
 
             // Normalize
             val len = sqrt(deltaAzimuth * deltaAzimuth + deltaAltitude * deltaAltitude)
