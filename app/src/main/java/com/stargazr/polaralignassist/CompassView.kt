@@ -95,7 +95,8 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
 
         currentLatitude?.let { lat ->
             val pixelsPerDegree = radius / 90f
-            val zoomThreshold = 15f // Degrees from center to apply zoom
+            val zoomThresholdAz = 15f
+            val zoomThresholdAlt = 10f
             val zoomFactor = 4f
 
             var deltaAzimuth = -azimuth
@@ -110,18 +111,6 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             var displayAzimuth = deltaAzimuth
             var displayAltitude = deltaAltitude*2
 
-            // Normalize
-            val len = sqrt(displayAzimuth * displayAzimuth + displayAltitude * displayAltitude)
-            if (len>90){
-                displayAzimuth = displayAzimuth/len*90
-                displayAltitude = displayAltitude/len*90
-                polarisPaint.style = Paint.Style.STROKE
-                polarisPaint.strokeWidth = 5f
-            } else {
-                polarisPaint.style = Paint.Style.FILL
-            }
-
-
             if (abs(deltaAzimuth) < 1.0f && abs(deltaAltitude) < 1.0f) {
                 polarisPaint.color = Color.GREEN
             } else {
@@ -131,10 +120,21 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             if (abs(deltaAltitude) < 1.0f) errorTextPaintAlt.color = Color.GREEN else errorTextPaintAlt.color = Color.RED
 
             // If we are close to the target, magnify the deltas for sensitivity
-            if (abs(deltaAzimuth) < zoomThreshold && abs(deltaAltitude) < zoomThreshold) {
+            if (abs(deltaAzimuth) < zoomThresholdAz && abs(deltaAltitude) < zoomThresholdAlt) {
                 displayAzimuth *= zoomFactor
-                displayAltitude *= zoomFactor
+                displayAltitude *= zoomFactor/2
                 canvas.drawCircle(centerX, centerY, pixelsPerDegree * zoomFactor, paint)
+            }
+
+            // Normalize
+            val len = sqrt(displayAzimuth * displayAzimuth + displayAltitude * displayAltitude)
+            if (len>90){
+                displayAzimuth = displayAzimuth/len*90
+                displayAltitude = displayAltitude/len*90
+                polarisPaint.style = Paint.Style.STROKE
+                polarisPaint.strokeWidth = 5f
+            } else {
+                polarisPaint.style = Paint.Style.FILL
             }
 
             // Convert degrees to pixel offsets
