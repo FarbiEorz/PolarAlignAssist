@@ -1,5 +1,6 @@
 package com.stargazr.polaralignassist
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -8,10 +9,10 @@ import android.util.AttributeSet
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.cos
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
+import androidx.core.graphics.withRotation
 
 class CompassView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
@@ -52,6 +53,7 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         invalidate()
     }
 
+    @SuppressLint("DefaultLocale")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         // Set background to black
@@ -64,19 +66,18 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
         val radius = min(centerX, centerY) - 80 // Adjusted radius to make space for text
 
         // Draw compass card
-        canvas.save()
-        canvas.rotate(-azimuth, centerX, centerY)
-        canvas.drawCircle(centerX, centerY, radius, paint)
-        for (i in 0 until 360 step 30) {
-            val angle = Math.toRadians(i.toDouble())
-            val startX = centerX + (radius - 20) * sin(angle).toFloat()
-            val startY = centerY - (radius - 20) * cos(angle).toFloat()
-            val stopX = centerX + radius * sin(angle).toFloat()
-            val stopY = centerY - radius * cos(angle).toFloat()
-            canvas.drawLine(startX, startY, stopX, stopY, paint)
+        canvas.withRotation(-azimuth, centerX, centerY) {
+            drawCircle(centerX, centerY, radius, paint)
+            for (i in 0 until 360 step 30) {
+                val angle = Math.toRadians(i.toDouble())
+                val startX = centerX + (radius - 20) * sin(angle).toFloat()
+                val startY = centerY - (radius - 20) * cos(angle).toFloat()
+                val stopX = centerX + radius * sin(angle).toFloat()
+                val stopY = centerY - radius * cos(angle).toFloat()
+                drawLine(startX, startY, stopX, stopY, paint)
+            }
+            drawText("N", centerX - 15, centerY - radius - 10, textPaint)
         }
-        canvas.drawText("N", centerX - 15, centerY - radius - 10, textPaint)
-        canvas.restore()
 
         // Draw crosshairs
         canvas.drawLine(centerX - 30, centerY, centerX + 30, centerY, paint)
