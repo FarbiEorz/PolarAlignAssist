@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.view.Surface
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.cos
@@ -61,6 +62,7 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
 
     @SuppressLint("DefaultLocale")
     override fun onDraw(canvas: Canvas) {
+        val rotation = display?.rotation ?: Surface.ROTATION_0
         super.onDraw(canvas)
         // Set background to black
         canvas.drawColor(Color.BLACK)
@@ -105,7 +107,7 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
 
             val deltaAltitude = lat - abs(devicePitch)
             if (devicePitch > 0) {
-                canvas.drawText("Inverted Pitch Mode", centerX, centerY - radius - 60f, pitchModeTextPaint)
+                canvas.drawText("Inverted Pitch Mode", centerX, centerY - radius/2, pitchModeTextPaint)
             }
 
             var displayAzimuth = deltaAzimuth
@@ -150,7 +152,12 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
             // Draw error text
             val azimuthErrorText = String.format("Azimuth Error: %.2f°", deltaAzimuth)
             val altitudeErrorText = String.format("Altitude Error: %.2f°", deltaAltitude)
-            val textYPosition = centerY + radius + 60f
+
+            val textYPosition = if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
+                centerY + radius + 60f
+            } else {
+                centerY + radius/2
+            }
             canvas.drawText(azimuthErrorText, centerX, textYPosition, errorTextPaintAz)
             canvas.drawText(altitudeErrorText, centerX, textYPosition + 50f, errorTextPaintAlt)
         }
