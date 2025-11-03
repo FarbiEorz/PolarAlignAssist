@@ -13,12 +13,16 @@ import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 import androidx.core.graphics.withRotation
+import java.nio.FloatBuffer
 
 class CompassView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
     private var azimuth: Float = 0f
     private var devicePitch: Float = 0f
     private var currentLatitude: Float? = null
+
+    private var azBuffer: FloatBuffer = FloatBuffer.allocate(32)
+    private var azBufferInitialized: Boolean = false
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -52,8 +56,19 @@ class CompassView(context: Context, attrs: AttributeSet? = null) : View(context,
     }
 
     fun updateData(azimuth: Float, devicePitch: Float, currentLatitude: Float) {
-        this.azimuth = azimuth
-        // The pitch from orientation sensor is negative when tilting up, so we invert it.
+        // stabilize azimuth values using a ring buffer
+        azBuffer.put(azimuth)
+        if (azBuffer.position() == azBuffer.limit()) azBuffer.rewind()
+
+        // fill the buffer if it is not initialized
+        // this prevents initial azimuth jumping
+        if (!azBufferInitialized) {
+            azBufferInitialized = true
+            azBuffer.array().fill(azimuth)
+        }
+
+        this.azimuth = azBuffer.array().average().toFloat()
+
         this.devicePitch = devicePitch
         this.currentLatitude = currentLatitude
         invalidate()
