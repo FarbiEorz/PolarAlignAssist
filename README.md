@@ -1,4 +1,4 @@
-# Polar Align Assist
+# [Polar Align Assist](https://github.com/FarbiEorz/PolarAlignAssist)
 Polar Align Assist is a simple Android app designed to assist with polar alignment.  
 - It uses the device's azimuth and pitch sensor for alignment.  
 - No camera or polar scope is required.  
